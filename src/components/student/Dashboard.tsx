@@ -14,9 +14,14 @@ export const StudentDashboard: React.FC = () => {
     return userRegistrations.some(reg => reg.event_id === eventId);
   };
 
-  const handleEventRegistration = (eventId: string) => {
+  const handleEventRegistration = async (eventId: string) => {
     if (user && !isRegisteredForEvent(eventId)) {
-      registerForEvent(user.id, eventId);
+      try {
+        await registerForEvent(user.id, eventId);
+      } catch (error) {
+        console.error('Error registering for event:', error);
+        alert('Error registering for event. Please try again.');
+      }
     }
   };
 
@@ -28,7 +33,14 @@ export const StudentDashboard: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Welcome, {user?.name}!</h1>
-        <p className="text-gray-600 mt-2">Discover and join exciting events and clubs</p>
+        <div className="flex items-center space-x-4 mt-2">
+          <p className="text-gray-600">Discover and join exciting events and clubs</p>
+          {user?.studentId && (
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full font-medium">
+              ID: {user.studentId}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Current Events */}

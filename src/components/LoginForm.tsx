@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn, User, Lock, AlertCircle } from 'lucide-react';
+import { LogIn, User, Lock, AlertCircle, UserPlus } from 'lucide-react';
 
-export const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  onShowSignup?: () => void;
+}
+
+export const LoginForm: React.FC<LoginFormProps> = ({ onShowSignup }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -90,11 +94,29 @@ export const LoginForm: React.FC = () => {
           </button>
         </form>
 
+        {onShowSignup && (
+          <div className="mt-6 text-center">
+            <p className="text-gray-600 mb-3">Don't have an account?</p>
+            <button
+              onClick={onShowSignup}
+              className="flex items-center justify-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors mx-auto"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>Create Student Account</span>
+            </button>
+          </div>
+        )}
+
         <div className="mt-8 p-4 bg-gray-50 rounded-lg">
           <p className="text-sm text-gray-600 mb-2">Demo Credentials:</p>
           <div className="text-xs space-y-1">
             <div><strong>Admin:</strong> admin@college.edu / password123</div>
-            <div><strong>Student:</strong> student@college.edu / password123</div>
+            <div><strong>Students:</strong></div>
+            <div className="ml-4">john.doe@student.edu / password123 (STU001)</div>
+            <div className="ml-4">jane.smith@student.edu / password123 (STU002)</div>
+            <div className="ml-4">mike.johnson@student.edu / password123 (STU003)</div>
+            <div className="ml-4">sarah.wilson@student.edu / password123 (STU004)</div>
+            <div className="ml-4">alex.brown@student.edu / password123 (STU005)</div>
           </div>
         </div>
       </div>

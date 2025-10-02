@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, User, Calendar, Users, Bell, Home, Settings } from 'lucide-react';
+import { LogOut, User, Calendar, Users, Bell, Home } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -46,7 +46,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageCha
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-lg">
                 <User className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">{user?.name}</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-700">{user?.name}</span>
+                  {user?.studentId && (
+                    <span className="text-xs text-gray-500">ID: {user.studentId}</span>
+                  )}
+                </div>
                 <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full capitalize">
                   {user?.role}
                 </span>

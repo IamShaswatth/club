@@ -1,6 +1,6 @@
 import React from 'react';
 import { useData } from '../../contexts/DataContext';
-import { CheckCircle, XCircle, Clock, Users } from 'lucide-react';
+import { CheckCircle, XCircle, Clock } from 'lucide-react';
 
 export const ClubRegistrations: React.FC = () => {
   const { clubs, clubRegistrations, approveClubRegistration, rejectClubRegistration } = useData();
@@ -50,14 +50,28 @@ export const ClubRegistrations: React.FC = () => {
       {showActions && (
         <div className="mt-4 flex space-x-2">
           <button
-            onClick={() => approveClubRegistration(registration.id)}
+            onClick={async () => {
+              try {
+                await approveClubRegistration(registration.id);
+              } catch (error) {
+                console.error('Error approving registration:', error);
+                alert('Error approving registration. Please try again.');
+              }
+            }}
             className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
           >
             <CheckCircle className="w-4 h-4" />
             <span>Approve</span>
           </button>
           <button
-            onClick={() => rejectClubRegistration(registration.id)}
+            onClick={async () => {
+              try {
+                await rejectClubRegistration(registration.id);
+              } catch (error) {
+                console.error('Error rejecting registration:', error);
+                alert('Error rejecting registration. Please try again.');
+              }
+            }}
             className="flex items-center space-x-1 px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
           >
             <XCircle className="w-4 h-4" />

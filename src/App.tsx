@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
-import { LoginForm } from './components/LoginForm';
+import { AuthWrapper } from './components/AuthWrapper';
 import { Layout } from './components/Layout';
 import { AdminDashboard } from './components/admin/Dashboard';
 import { EventManagement } from './components/admin/EventManagement';
@@ -28,7 +28,7 @@ const AppContent: React.FC = () => {
   }
 
   if (!user) {
-    return <LoginForm />;
+    return <AuthWrapper />;
   }
 
   const renderPage = () => {

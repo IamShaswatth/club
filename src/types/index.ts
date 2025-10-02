@@ -2,6 +2,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  password?: string; // Password for authentication (in production, this would be hashed)
+  studentId?: string; // Unique student ID for students
   role: 'admin' | 'student';
   created_at: string;
 }

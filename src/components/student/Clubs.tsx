@@ -18,7 +18,10 @@ export const Clubs: React.FC = () => {
     
     setRegistering(clubId);
     try {
-      registerForClub(user.id, clubId);
+      await registerForClub(user.id, clubId);
+    } catch (error) {
+      console.error('Error registering for club:', error);
+      alert('Error registering for club. Please try again.');
     } finally {
       setRegistering(null);
     }

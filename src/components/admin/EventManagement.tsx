@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Calendar, MapPin, Clock, Plus, Download, Users } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 
 export const EventManagement: React.FC = () => {
   const { clubs, events, eventRegistrations, createEvent } = useData();
@@ -15,38 +16,119 @@ export const EventManagement: React.FC = () => {
     time: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (user) {
-      createEvent({
-        ...formData,
-        created_by: user.id,
-      });
-      setFormData({
-        name: '',
-        organizing_club_id: '',
-        venue: '',
-        date: '',
-        time: '',
-      });
-      setShowCreateForm(false);
+      try {
+        await createEvent({
+          ...formData,
+          created_by: user.id,
+        });
+        setFormData({
+          name: '',
+          organizing_club_id: '',
+          venue: '',
+          date: '',
+          time: '',
+        });
+        setShowCreateForm(false);
+      } catch (error) {
+        console.error('Error creating event:', error);
+        alert('Error creating event. Please try again.');
+      }
     }
   };
 
-  const downloadCSV = (eventId: string) => {
-    const registrations = eventRegistrations.filter(reg => reg.event_id === eventId);
-    const csvContent = [
-      ['Student ID', 'Registration Date'],
-      ...registrations.map(reg => [reg.user_id, new Date(reg.registered_at).toLocaleDateString()])
-    ].map(row => row.join(',')).join('\n');
+  const downloadCSV = async (eventId: string) => {
+    try {
+      const registrations = eventRegistrations.filter(reg => reg.event_id === eventId);
+      
+      if (registrations.length === 0) {
+        alert('No registrations found for this event.');
+        return;
+      }
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `event-${eventId}-registrations.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+      let studentsData: Array<{
+        studentId: string;
+        name: string;
+        email: string;
+        registrationDate: string;
+        registrationTime: string;
+      }> = [];
+
+      if (isSupabaseConfigured && supabase) {
+        // Fetch real user data from database
+        const userIds = registrations.map(reg => reg.user_id);
+        const { data: users, error } = await supabase
+          .from('users')
+          .select('id, name, email, student_id')
+          .in('id', userIds);
+
+        if (error) {
+          console.error('Error fetching users:', error);
+          throw error;
+        }
+
+        studentsData = registrations.map(reg => {
+          const user = users?.find(u => u.id === reg.user_id);
+          const regDate = new Date(reg.registered_at);
+          return {
+            studentId: user?.student_id || 'N/A',
+            name: user?.name || 'Unknown Student',
+            email: user?.email || 'Unknown Email',
+            registrationDate: regDate.toLocaleDateString(),
+            registrationTime: regDate.toLocaleTimeString(),
+          };
+        });
+      } else {
+        // Fallback mode - use mock data
+        const mockUsers = [
+          { id: '2', name: 'John Doe', studentId: 'STU001', email: 'john.doe@student.edu' },
+          { id: '3', name: 'Jane Smith', studentId: 'STU002', email: 'jane.smith@student.edu' },
+          { id: '4', name: 'Mike Johnson', studentId: 'STU003', email: 'mike.johnson@student.edu' },
+          { id: '5', name: 'Sarah Wilson', studentId: 'STU004', email: 'sarah.wilson@student.edu' },
+          { id: '6', name: 'Alex Brown', studentId: 'STU005', email: 'alex.brown@student.edu' },
+        ];
+        
+        studentsData = registrations.map(reg => {
+          const student = mockUsers.find(u => u.id === reg.user_id);
+          const regDate = new Date(reg.registered_at);
+          return {
+            studentId: student?.studentId || 'Unknown',
+            name: student?.name || 'Unknown Student',
+            email: student?.email || 'Unknown Email',
+            registrationDate: regDate.toLocaleDateString(),
+            registrationTime: regDate.toLocaleTimeString(),
+          };
+        });
+      }
+
+      // Create CSV content
+      const csvContent = [
+        ['Student ID', 'Student Name', 'Email', 'Registration Date', 'Registration Time'],
+        ...studentsData.map(student => [
+          student.studentId,
+          student.name,
+          student.email,
+          student.registrationDate,
+          student.registrationTime
+        ])
+      ].map(row => row.join(',')).join('\n');
+
+      const event = events.find(e => e.id === eventId);
+      const eventName = event?.name || 'Unknown Event';
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${eventName.replace(/[^a-zA-Z0-9]/g, '_')}_registrations.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading CSV:', error);
+      alert('Error downloading CSV. Please try again.');
+    }
   };
 
   return (
