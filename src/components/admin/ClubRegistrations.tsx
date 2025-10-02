@@ -20,7 +20,11 @@ export const ClubRegistrations: React.FC = () => {
     <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-medium text-gray-900">Student ID: {registration.user_id}</h3>
+          <h3 className="font-medium text-gray-900">{registration.user?.name || 'Unknown Student'}</h3>
+          <p className="text-sm text-gray-600">Email: {registration.user?.email || 'N/A'}</p>
+          {registration.user?.studentId && (
+            <p className="text-sm text-gray-600">Student ID: {registration.user.studentId}</p>
+          )}
           <p className="text-sm text-gray-600">Club: {getClubName(registration.club_id)}</p>
           <p className="text-xs text-gray-500">
             Requested: {new Date(registration.requested_at).toLocaleDateString()}

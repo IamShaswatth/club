@@ -77,8 +77,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const [clubsData, eventsData, eventRegsData, clubRegsData] = await Promise.all([
           supabase.from('clubs').select('*'),
           supabase.from('events').select('*'),
-          supabase.from('event_registrations').select('*'),
-          supabase.from('club_registrations').select('*'),
+          supabase.from('event_registrations').select(`
+            *,
+            users:user_id (
+              name,
+              email,
+              student_id
+            )
+          `),
+          supabase.from('club_registrations').select(`
+            *,
+            users:user_id (
+              name,
+              email,
+              student_id
+            )
+          `),
         ]);
 
         if (clubsData.data) {
@@ -111,6 +125,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             user_id: reg.user_id,
             event_id: reg.event_id,
             registered_at: reg.registered_at,
+            user: reg.users ? {
+              id: reg.user_id,
+              name: reg.users.name,
+              email: reg.users.email,
+              studentId: reg.users.student_id,
+              role: 'student' as const,
+              created_at: new Date().toISOString(),
+            } : undefined,
           }));
           setEventRegistrations(mappedEventRegs);
         }
@@ -123,6 +145,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             status: reg.status as 'pending' | 'approved' | 'rejected',
             requested_at: reg.requested_at,
             approved_at: reg.approved_at,
+            user: reg.users ? {
+              id: reg.user_id,
+              name: reg.users.name,
+              email: reg.users.email,
+              studentId: reg.users.student_id,
+              role: 'student' as const,
+              created_at: new Date().toISOString(),
+            } : undefined,
           }));
           setClubRegistrations(mappedClubRegs);
         }
